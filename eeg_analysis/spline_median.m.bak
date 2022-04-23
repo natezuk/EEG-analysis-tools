@@ -4,7 +4,8 @@ function [md,mddistr] = spline_median(x,ds,dim,sbj_lbls,varargin)
 % along the first dimension of x (for example, smoothing along delays). Up
 % to 4 dimensions are allowed
 % If sbj_lbls is specified, then calculate the distribution of median
-% values using resampling with replacement within subjects.
+% values using resampling with replacement within subjects. The last
+% dimension must be 
 
 if nargin<4 || isempty(sbj_lbls)
     sbj_lbls = [];
