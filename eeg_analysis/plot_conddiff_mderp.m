@@ -43,7 +43,7 @@ for jj = 1:length(chan_to_plot)
     grid;
     set(gca,'FontSize',12);
     xlabel('Delay (ms)');
-    ylabel('Median ERP (\muV)');
+    ylabel('Median ERP difference (\muV)');
     title(sprintf('%s, %s',sbj,chan_to_plot{jj}),'Interpreter','none');
     % if a legend for each condition was provided, use that
     if ~isempty(row_lbl)
@@ -62,10 +62,11 @@ saveas(gcf,img_fl);
 % Plot an image of the ERP    
 % get maximum magnitude
 mx = max(max(max(abs(diffERP))));
+nplot_col = ceil(sqrt(nrow));
 figure
-set(gcf,'Position',[13 300 1500 400]);
+set(gcf,'Position',[100 300 900 700]);
 for c = 1:nrow
-    subplot(ceil(nrow/3),3,c);
+    subplot(ceil(nrow/nplot_col),nplot_col,c);
     imagesc(dly,1:nchan,diffERP(:,:,c)');
     colorbar;
     caxis([-mx mx]);

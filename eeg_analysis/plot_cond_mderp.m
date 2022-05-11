@@ -1,4 +1,4 @@
-function plot_cond_mderp(erps,dly,cond,chan_to_plot,chan_lbls,sbj,exp_condition,cond_lbl,fl_suffix,mark_times)
+function plot_cond_mderp(erps,dly,cond,chan_to_plot,chan_lbls,sbj,exp_condition,cond_lbl,fl_suffix,mark_times,varargin)
 % Plot the median ERP for individual channels and all channels, overlaid
 % traces by condition ('erps' should be a cell array of blocks corresponding
 % to different conditions, repeated conditions are combined when computing the median)
@@ -6,6 +6,10 @@ function plot_cond_mderp(erps,dly,cond,chan_to_plot,chan_lbls,sbj,exp_condition,
 if nargin<8, cond_lbl={}; end
 if nargin<9, fl_suffix=''; end
 if nargin<10, mark_times=[]; end
+
+indiv_chan_pos = [200 200 1000 550];
+all_chan_pos = [100 100 900 800];
+leg_loc = 'southeast';
 
 % get the set of unique ibis
 unq_cond = unique(cond);
@@ -35,7 +39,7 @@ mn = min(min(min(mdERP)));
 figure
 cmap = colormap('hsv')*0.8;
 cnd_plt = NaN(length(unq_cond),1);
-set(gcf,'Position',[200 200 1000 550]);
+set(gcf,'Position',indiv_chan_pos);
 for jj = 1:length(chan_to_plot)
     % get the index for the channel
     chan = strcmp(chan_lbls,chan_to_plot{jj});
@@ -56,9 +60,9 @@ for jj = 1:length(chan_to_plot)
     title(sprintf('%s, %s',sbj,chan_to_plot{jj}),'Interpreter','none');
     % if a legend for each condition was provided, use that
     if ~isempty(cond_lbl)
-        legend(cnd_plt,cond_lbl,'Location','southwest');
+        legend(cnd_plt,cond_lbl,'Location',leg_loc);
     else % otherwise, just use the condition values
-        legend(cnd_plt,unq_cond,'Location','southwest');
+        legend(cnd_plt,unq_cond,'Location',leg_loc);
     end
 end
 if ~isempty(fl_suffix)
@@ -70,11 +74,12 @@ saveas(gcf,img_fl);
 
 % Plot an image of the ERP    
 % get maximum magnitude
+nplot_col = ceil(sqrt(length(unq_cond)));
 mx = max(max(max(abs(mdERP))));
 figure
-set(gcf,'Position',[13 300 1500 400]);
+set(gcf,'Position',all_chan_pos);
 for c = 1:length(unq_cond)
-    subplot(ceil(length(unq_cond)/3),3,c);
+    subplot(ceil(length(unq_cond)/nplot_col),nplot_col,c);
     imagesc(dly,1:nchan,mdERP(:,:,c)');
     colorbar;
     caxis([-mx mx]);

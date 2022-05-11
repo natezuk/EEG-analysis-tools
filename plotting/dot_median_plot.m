@@ -91,7 +91,7 @@ for ii = 1:length(unqlbls),
             clr = cmap(cidx,:);
         end
         % Plot the dots
-        y_idx = lbl{jj}==ii; % get the y-values for the correct label
+        y_idx = lbl{jj}==unqlbls(ii); % get the y-values for the correct label
         ml = cell_midline(jj)+ii;
         x_pos = tot_span/ncells*(rand(sum(y_idx),1)-0.5)*(jit_span)+ml;
             % get the x-coordinates, which are slightly jittered for each dot
