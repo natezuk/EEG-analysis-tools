@@ -9,7 +9,7 @@ if nargin<10, fl_suffix=''; end
 all_chan_pos = [100 100 900 800];
 nytick = 20;
 crange = [-50 50];
-smooth_wnd = 13; % size of smoothing window
+smooth_wnd = 7; % size of smoothing window
 % leg_loc = 'southeast';
 
 if ~isempty(varargin)
