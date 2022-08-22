@@ -27,6 +27,6 @@ for n = 1:nbins
     idx = x>=xbins(n) & x<xbins(n+1);
     y_quantiles(n,1) = quantile(y(idx),plot_quantiles(1));
     y_quantiles(n,2) = quantile(y(idx),plot_quantiles(2));
-    y_median(n) = median(y(idx));
+    y_median(n) = median(y(idx),'omitnan');
     nvals(n) = sum(idx);
 end
