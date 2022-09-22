@@ -10,6 +10,9 @@ all_chan_pos = [100 100 900 800];
 nytick = 20;
 crange = [-50 50];
 smooth_wnd = 7; % size of smoothing window
+show_vals = false; % indicates if the values should be shown in the plot with a dashed line
+    % this is only useful if the values are delays and match times in the
+    % ERP
 % leg_loc = 'southeast';
 
 if ~isempty(varargin)
@@ -36,6 +39,11 @@ for c = 1:length(chan_to_plot)
     imagesc(dly,1:length(srtv),erp_set);
     colorbar;
     caxis(crange);
+    % plot the values, if specified
+    if show_vals
+        hold on
+        plot(srtv,1:length(srtv),'r--','LineWidth',1.5);
+    end
     set(gca,'FontSize',10,'YTick',val_ticks,'YTickLabel',srtv(val_ticks));
     xlabel('Delay (ms)');
     ylabel(val_lbl);

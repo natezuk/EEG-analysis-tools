@@ -13,13 +13,14 @@ function [median_handles,cell_midline] = dot_median_plot(lbl,yvals,cmap,varargin
 %     and lbl must be a cell array with the same dimensions as yvals in
 %     each cell. Each cell is plotted as a different color.
 % - (optional) cmap = 64x3 dimension matrix specifying the rgb values of
-% the colormap to use (only used if there is more than one cell or column
-% in y-vals
+%   the colormap to use (only used if there is more than one cell or column
+%   in y-vals
 % Outputs:
 % - median_handles = handle labels for the median lines for each
 % - cell_midline = x-value of the position of the data for a cell relative
 %   to the x-value for the label
-% cell/column, so that they can be labeled with a legend
+%   cell/column, so that they can be labeled with a legend
+% Nate Zuk (2016-2022)
 
 jit_span = 0.4; % span, in x-values, of the jittered dots
 med_span = 0.8; % span, in x-values, of the line for the median
@@ -87,7 +88,11 @@ for ii = 1:length(unqlbls),
         if ncells==1,
             clr = [0 0 0]; % otherwise use black
         else
-            cidx = round((jj-1)/ncells*(size(cmap,1)-1))+1;
+            if size(cmap,2)>ncells
+                cidx = round((jj-1)/ncells*(size(cmap,1)-1))+1;
+            else
+                cidx = jj;
+            end
             clr = cmap(cidx,:);
         end
         % Plot the dots
@@ -102,4 +107,4 @@ for ii = 1:length(unqlbls),
         median_handles(jj) = plot(x_md_pos,[y_md y_md],'Color',clr,'LineWidth',line_width);
     end
 end
-set(gca,'FontSize',16,'XTick',1:length(unqlbls),'XTickLabel',unqlbls);
+set(gca,'FontSize',12,'XTick',1:length(unqlbls),'XTickLabel',unqlbls);
