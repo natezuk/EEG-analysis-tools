@@ -4,9 +4,9 @@ function plot_conddiff_mderp(erps,dly,chan_to_plot,chan_lbls,sbj,exp_condition,r
 % between conditions in each row is plotted as a separate trace.
 % Nate Zuk (2022)
 
-if nargin<8, row_lbl={}; end
-if nargin<9, fl_suffix=''; end
-if nargin<10, mark_times=[]; end
+if nargin<7, row_lbl={}; end
+if nargin<8, fl_suffix=''; end
+if nargin<9, mark_times=[]; end
 
 % get the set of unique ibis
 nrow = size(erps,1);
@@ -45,12 +45,13 @@ for jj = 1:length(chan_to_plot)
     xlabel('Delay (ms)');
     ylabel('Median ERP difference (\muV)');
     title(sprintf('%s, %s',sbj,chan_to_plot{jj}),'Interpreter','none');
-    % if a legend for each condition was provided, use that
-    if ~isempty(row_lbl)
-        legend(cnd_plt,row_lbl,'Location','southwest');
-    else % otherwise, just use the condition values
-        legend(cnd_plt,unq_cond,'Location','southwest');
-    end
+end
+% if a legend for each condition was provided, use that
+% show the legend only in the last figure
+if ~isempty(row_lbl)
+    legend(cnd_plt,row_lbl,'Location','southwest');
+else % otherwise, just use the condition values
+    legend(cnd_plt,unq_cond,'Location','southwest');
 end
 if ~isempty(fl_suffix)
     img_fl = sprintf('fig/%s_%s_conddiff_indivchans_%s.png',sbj,exp_condition,fl_suffix);

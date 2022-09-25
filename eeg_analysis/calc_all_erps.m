@@ -1,6 +1,10 @@
 function [erps,dly,trig_vals,chan_lbls,null_erp] = calc_all_erps(eeg_fl,triggers,erp_range,baseline,reference,...
     sound_delay,desiredFs)
 % Load a file with EEG, and get all event-related potentials (not averaged)
+% (Update 27-7-2022): Instead of using the variance of EEG channels to
+% determine if the mastoids should be rejected, use the interquartile range
+% for each electrode. This is more robust to sparse artifacts, which are
+% likely ignored after segmenting into ERPs.
 % Nate Zuk (2021)
 
 if nargin<7
@@ -38,16 +42,23 @@ trig_vals = trigs(trig_onsets);
 sound_delay_idx = round(sound_delay/1000*eFs);
 stim(trig_onsets + sound_delay_idx) = 1;
 % Remove the reference
-veeg = var(eeg);
-fprintf('EEG channel variance: %.3f [%.3f %.3f]\n',...
+% veeg = var(eeg);
+veeg = iqr(eeg);
+fprintf('EEG channel IQR: %.3f [%.3f %.3f]\n',...
     median(veeg),quantile(veeg,0.25),quantile(veeg,0.75));
 if strcmp(reference,'nose')
-    fprintf('Nose variance: %.3f\n',var(nose));
+%     fprintf('Nose variance: %.3f\n',var(nose));
+    fprintf('Nose IQR: %.3f\n',iqr(nose));
     reeg = eeg - nose*ones(1,size(eeg,2));
 elseif strcmp(reference,'mastoids')
-    fprintf('Mastoids variance: %.3f, %.3f\n',var(mastoids(:,1)),var(mastoids(:,2)));
-    use_mastoids = var(mastoids)<3*quantile(veeg,0.75);
+%     fprintf('Mastoids variance: %.3f, %.3f\n',var(mastoids(:,1)),var(mastoids(:,2)));
+%     use_mastoids = var(mastoids)<3*quantile(veeg,0.75);
+    fprintf('Mastoids IQR: %.3f, %.3f\n',iqr(mastoids(:,1)),iqr(mastoids(:,2)));
+	%%% Updated script (29-7-2022):
+    use_mastoids = iqr(mastoids)<(median(veeg)+2*iqr(veeg));
+	%%%
     if any(use_mastoids==0)
+%         keyboard;
         if sum(use_mastoids==0)==2
             warning('** Both mastoid channels are bad, using P7 / P8 instead...');
             use_mastoids = [1 1];
