@@ -1,4 +1,4 @@
-function plot_conddiff_mderp(erps,dly,chan_to_plot,chan_lbls,sbj,exp_condition,row_lbl,fl_suffix,mark_times)
+function plot_conddiff_mderp(erps,dly,chan_to_plot,chan_lbls,sbj,exp_condition,row_lbl,fl_suffix,mark_times,varargin)
 % Plot the difference in median ERP between two conditions, where separate
 % conditions are stored in columns of the cell array erps. The difference
 % between conditions in each row is plotted as a separate trace.
@@ -7,6 +7,15 @@ function plot_conddiff_mderp(erps,dly,chan_to_plot,chan_lbls,sbj,exp_condition,r
 if nargin<7, row_lbl={}; end
 if nargin<8, fl_suffix=''; end
 if nargin<9, mark_times=[]; end
+
+% Plotting parameters
+spline_ds = 6;
+
+if ~isempty(varargin)
+    for n = 2:2:length(varargin)
+        eval([varargin{n-1} '=varargin{n};']);
+    end
+end
 
 % get the set of unique ibis
 nrow = size(erps,1);
@@ -17,7 +26,7 @@ nchan = length(chan_lbls);
 
 diffERP = NaN(ndly,nchan,nrow);
 for c = 1:nrow
-    diffERP(:,:,c) = spline_median(erps{c,2},6,3) - spline_median(erps{c,1},6,3);
+    diffERP(:,:,c) = spline_median(erps{c,2},spline_ds,3) - spline_median(erps{c,1},spline_ds,3);
 end
 
 % Plot the ERP at each channel

@@ -70,7 +70,7 @@ for jj = 1:length(chan_to_plot)
     grid;
     set(gca,'FontSize',12);
     xlabel('Delay (ms)');
-    ylabel('Median ERP difference (\muV)');
+    ylabel('Median ERP (\muV)');
     title(sprintf('%s, %s',sbj,chan_to_plot{jj}),'Interpreter','none');
 end
 % if a legend for each condition was provided, use that
