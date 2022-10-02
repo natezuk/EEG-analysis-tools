@@ -17,6 +17,7 @@ function grp_handles = dot_connect_plot(yvals,cond_lbl,cmap,varargin)
 %   yvals)
 % Outputs:
 % - grp_handles = handle labels for the median circles for each group
+% (Update, 28-9-2022): Median uses 'omitnan'
 
 % plotting parameters
 indiv_circ_size = 10; % size of the circles for individual datapoints
@@ -82,7 +83,7 @@ for n = 1:ncells
     % plot the individual circles in a slightly lighter color
     plot(grp_cnt(n)+xpos_cond,yvals{n},'-o','Color',clr*0.5+0.5,...
         'LineWidth',indiv_line_width,'MarkerSize',indiv_circ_size);
-    grp_handles(n) = plot(grp_cnt(n)+xpos_cond,median(yvals{n}),'o',...
+    grp_handles(n) = plot(grp_cnt(n)+xpos_cond,median(yvals{n},'omitnan'),'o',...
         'Color',clr,'LineWidth',md_line_width,'MarkerSize',md_circ_size);
     % store the xticks
     idx = (1:nconds)+(n-1)*nconds;
