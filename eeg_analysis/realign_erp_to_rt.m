@@ -17,7 +17,7 @@ for ii = 1:ntr
     % get the reaction time for this trial, and identify appropriate
     % delays
     if ~isnan(rt(ii))
-        rt_idx = round(rt(ii)-sound_delay)/1000*eFs;
+        rt_idx = (rt(ii)-sound_delay)/1000*eFs; % (3-10-2022) Removed rounding
         rt_dly = (rt_dly_idx+rt_idx)/eFs*1000;
         for c = 1:nchan
             rt_erp(:,c,ii) = interp1(dly,erp(:,c,ii),rt_dly,'pchip');
