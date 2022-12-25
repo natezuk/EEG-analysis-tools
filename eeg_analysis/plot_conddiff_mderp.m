@@ -10,6 +10,7 @@ if nargin<9, mark_times=[]; end
 
 % Plotting parameters
 spline_ds = 6;
+leg_loc = 'southwest';
 
 if ~isempty(varargin)
     for n = 2:2:length(varargin)
@@ -58,9 +59,9 @@ end
 % if a legend for each condition was provided, use that
 % show the legend only in the last figure
 if ~isempty(row_lbl)
-    legend(cnd_plt,row_lbl,'Location','southwest');
+    legend(cnd_plt,row_lbl,'Location',leg_loc);
 else % otherwise, just use the condition values
-    legend(cnd_plt,unq_cond,'Location','southwest');
+    legend(cnd_plt,unq_cond,'Location',leg_loc);
 end
 if ~isempty(fl_suffix)
     img_fl = sprintf('fig/%s_%s_conddiff_indivchans_%s.png',sbj,exp_condition,fl_suffix);

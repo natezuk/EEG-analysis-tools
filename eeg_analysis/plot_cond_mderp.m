@@ -10,6 +10,13 @@ if nargin<10, mark_times=[]; end
 indiv_chan_pos = [200 200 1000 550];
 all_chan_pos = [100 100 900 800];
 leg_loc = 'southeast';
+leg_onplot = [];
+
+if ~isempty(varargin)
+    for n = 2:2:length(varargin)
+        eval([varargin{n-1} '=varargin{n};']);
+    end
+end
 
 % get the set of unique ibis
 unq_cond = unique(cond);
@@ -31,6 +38,11 @@ for c = 1:length(unq_cond)
     end
 %     mdERP(:,:,c) = median(allerp,3,'omitnan');
     mdERP(:,:,c) = spline_median(allerp,6,3);
+end
+
+% Identify where to put the legend (all plots by default)
+if isempty(leg_onplot)
+    leg_onplot = 1:length(chan_to_plot);
 end
 
 % Plot the ERP at each channel
@@ -59,10 +71,12 @@ for jj = 1:length(chan_to_plot)
     ylabel('Median ERP (\muV)');
     title(sprintf('%s, %s',sbj,chan_to_plot{jj}),'Interpreter','none');
     % if a legend for each condition was provided, use that
-    if ~isempty(cond_lbl)
-        legend(cnd_plt,cond_lbl,'Location',leg_loc);
-    else % otherwise, just use the condition values
-        legend(cnd_plt,unq_cond,'Location',leg_loc);
+    if sum(leg_onplot==jj)>0 % if a legend should be placed on this plot
+        if ~isempty(cond_lbl)
+            legend(cnd_plt,cond_lbl,'Location',leg_loc);
+        else % otherwise, just use the condition values
+            legend(cnd_plt,unq_cond,'Location',leg_loc);
+        end
     end
 end
 if ~isempty(fl_suffix)
