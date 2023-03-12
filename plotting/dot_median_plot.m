@@ -88,7 +88,7 @@ for ii = 1:length(unqlbls),
         if ncells==1,
             clr = [0 0 0]; % otherwise use black
         else
-            if size(cmap,2)>ncells
+            if size(cmap,1)>ncells
                 cidx = round((jj-1)/ncells*(size(cmap,1)-1))+1;
             else
                 cidx = jj;
