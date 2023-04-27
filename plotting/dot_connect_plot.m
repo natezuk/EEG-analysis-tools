@@ -1,8 +1,7 @@
 function grp_handles = dot_connect_plot(yvals,cond_lbl,cmap,varargin)
 % Plot paired y-values connected with lines between conditions. Groups are
 % plotted spaced along the x-axis. The median of each condition is plotted
-% with thicker circles that are not connected between conditions. (Note:
-% The median is calculated without omitting NaN values)
+% with thicker circles that are not connected between conditions.
 % Inputs:
 % - yvals: A 2D numeric array OR a cell array containing 2D numeric arrays.
 %   -- In the array, each row contains paired datapoints, and each column

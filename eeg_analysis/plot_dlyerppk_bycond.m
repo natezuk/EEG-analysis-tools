@@ -13,6 +13,8 @@ function [ctrl_v,asd_v] = plot_dlyerppk_bycond(ctrl_erps,asd_erps,dly,dir,dly_ra
 % (Update 2-10-2022) If multiple channels are specified, first average the
 % ERP over these channels, then compute the peak ERP voltage within the
 % range of delays.
+% (Update 4-4-2023): Medians in plot skip NaN values (for example, if some
+% subjects are missing that condition)
 % Nate Zuk (2022)
 
 nctrl = length(ctrl_erps);
@@ -20,8 +22,10 @@ nasd = length(asd_erps);
 ncond = length(ctrl_erps{1});
 
 fig_pos = [100 100 1000 350];
+ylim = [];
 ctrl_clr = [0 0 1]; % color for control subjects
 asd_clr = [0 0.8 0]; % color for ASD subjects
+skip_stats = false; % flag to skip calculating statistics (if desired)
 
 if nargin < 7 || isempty(cond_lbls)
     cond_lbls = 1:ncond;
@@ -73,19 +77,21 @@ for s = 1:nasd
     end
 end
 
-% Stats: If # conditions > 2, use friedman test, otherwise use signrank
-if ncond>2
-    [p_ctrl,tbl] = friedman(ctrl_v,1,'off');
-    st_ctrl = tbl{2,5};
-    [p_asd,tbl] = friedman(asd_v,1,'off');
-    st_asd = tbl{2,5};
-    stat_used = 'Friedman';
-else
-    [p_ctrl,~,st] = signrank(ctrl_v(:,1),ctrl_v(:,2));
-    st_ctrl = st.signedrank;
-    [p_asd,~,st] = signrank(asd_v(:,1),asd_v(:,2));
-    st_asd = st.signedrank;
-    stat_used = 'Sign-rank';
+if ~skip_stats,
+    % Stats: If # conditions > 2, use friedman test, otherwise use signrank
+    if ncond>2
+        [p_ctrl,tbl] = friedman(ctrl_v,1,'off');
+        st_ctrl = tbl{2,5};
+        [p_asd,tbl] = friedman(asd_v,1,'off');
+        st_asd = tbl{2,5};
+        stat_used = 'Friedman';
+    else
+        [p_ctrl,~,st] = signrank(ctrl_v(:,1),ctrl_v(:,2));
+        st_ctrl = st.signedrank;
+        [p_asd,~,st] = signrank(asd_v(:,1),asd_v(:,2));
+        st_asd = st.signedrank;
+        stat_used = 'Sign-rank';
+    end
 end
 
 % plot all subjects
@@ -96,28 +102,38 @@ subplot(1,2,1)
 hold on
 plot([0 ncond+1],[0 0],'k--');
 plot(1:ncond,ctrl_v,'o-','Color',(ctrl_clr*0.5)+0.5,'MarkerSize',10,'LineWidth',1);
-plot(1:ncond,median(ctrl_v),'o','Color',ctrl_clr,'MarkerSize',12,'LineWidth',3);
+plot(1:ncond,median(ctrl_v,'omitnan'),'o','Color',ctrl_clr,'MarkerSize',12,'LineWidth',3);
 set(gca,'FontSize',12,'XLim',[0 ncond+1],'XTick',1:ncond,'XTickLabel',cond_lbls,...
     'XTickLabelRotation',45);
+if ~isempty(ylim), set(gca,'YLim',ylim); end
 ylabel(ylbl);
-if strcmp(stat_used,'Friedman')
-    title(sprintf('Controls (N=%d); %s: stat = %.2f, p = %.3f',nctrl,stat_used,st_ctrl,p_ctrl));
+if skip_stats
+    title(sprintf('Controls (N=%d)',nctrl));
 else
-    title(sprintf('Controls (N=%d); %s: stat = %d, p = %.3f',nctrl,stat_used,st_ctrl,p_ctrl));
+    if strcmp(stat_used,'Friedman')
+        title(sprintf('Controls (N=%d); %s: stat = %.2f, p = %.3f',nctrl,stat_used,st_ctrl,p_ctrl));
+    else
+        title(sprintf('Controls (N=%d); %s: stat = %d, p = %.3f',nctrl,stat_used,st_ctrl,p_ctrl));
+    end
 end
 % ASD
 subplot(1,2,2)
 hold on
 plot([0 ncond+1],[0 0],'k--');
 plot(1:ncond,asd_v,'o-','Color',asd_clr*0.5+0.5,'MarkerSize',10,'LineWidth',1);
-plot(1:ncond,median(asd_v),'o','Color',asd_clr,'MarkerSize',12,'LineWidth',3);
+plot(1:ncond,median(asd_v,'omitnan'),'o','Color',asd_clr,'MarkerSize',12,'LineWidth',3);
 set(gca,'FontSize',12,'XLim',[0 ncond+1],'XTick',1:ncond,'XTickLabel',cond_lbls,...
     'XTickLabelRotation',45);
+if ~isempty(ylim), set(gca,'YLim',ylim); end
 ylabel(ylbl);
-if strcmp(stat_used,'Friedman')
-    title(sprintf('ASD (N=%d); %s: stat = %.2f, p = %.3f',nctrl,stat_used,st_asd,p_asd));
+if skip_stats
+    title(sprintf('ASD (N=%d)',nasd));
 else
-    title(sprintf('ASD (N=%d); %s: stat = %d, p = %.3f',nasd,stat_used,st_asd,p_asd));
+    if strcmp(stat_used,'Friedman')
+        title(sprintf('ASD (N=%d); %s: stat = %.2f, p = %.3f',nctrl,stat_used,st_asd,p_asd));
+    else
+        title(sprintf('ASD (N=%d); %s: stat = %d, p = %.3f',nasd,stat_used,st_asd,p_asd));
+    end
 end
 
 saveas(gcf,sprintf('fig/AllSbj_dlyerppkbycond_%s.png',suffix));
