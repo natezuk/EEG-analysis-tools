@@ -1,4 +1,4 @@
-function v = calc_v_pk(erps,dly,dir,dly_range,chans_to_avg)
+function [v,t,c] = calc_v_pk(erps,dly,dir,dly_range,chans_to_avg)
 % For a set of ERPs for one subject (delay x channels x trials) calculate
 % the maximum voltage within a particular delay range and/or over a set of
 % channels.
@@ -20,6 +20,7 @@ function v = calc_v_pk(erps,dly,dir,dly_range,chans_to_avg)
 %   * channels x trials, if delays are used
 %   * delays x trials, if channels are used
 %   * trials x 1, if delays and channels are used
+% (Update 31-5-2023) Output the delay at which the peak occurs
 % Nate Zuk (2022)
 
 if nargin < 3 || isempty(dly_range)
@@ -40,11 +41,33 @@ end
 % If dir is negative, then we are calculating the minimum, because min(erp)
 % = -max(-erp)
 if ~isempty(dly_idx) && ~isempty(chan_idx)
-    v = squeeze(max(max(erps(dly_idx,chan_idx,:)*dir,[],2)))*dir;
+    ERP = erps(dly_idx,chan_idx,:);
+    v = squeeze(max(max(ERP*dir,[],2)))*dir;
+    [tidx,cidx] = find(ERP*dir==v*dir);
 elseif ~isempty(dly_idx)
-    v = squeeze(max(erps(dly_idx,:,:)*dir))*dir;
+    ERP = erps(dly_idx,:,:);
+    v = squeeze(max(ERP*dir))*dir;
+    [~,tidx] = max(ERP*dir);
+    cidx = [];
 elseif ~isempty(chan_idx)
-    v = squeeze(max(erps(:,chan_idx,:)*dir,[],2))*dir;
+    ERP = erps(:,chan_idx,:);
+    v = squeeze(max(ERP*dir,[],2))*dir;
+    [~,cidx] = max(ERP*dir,[],2);
+    tidx = [];
 else
     v = erps;
+    tidx = [];
+    cidx = [];
+end
+% Get the delays for the peak
+if ~isempty(tidx)
+    dly_short = dly(dly_idx);
+    t = dly_short(tidx);
+else
+    t = [];
+end
+if ~isempty(cidx)
+    c = chan_idx(cidx);
+else
+    c = [];
 end

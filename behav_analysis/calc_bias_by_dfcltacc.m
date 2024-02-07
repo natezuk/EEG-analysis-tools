@@ -1,4 +1,4 @@
-function [dpr_bias,pc_bias,ntr_bias] = calc_bias_by_dfcltacc(corr,resp,s1,s2,fd_thres)
+function [dpr_bias,pc_bias,ntr_bias] = calc_bias_by_dfcltacc(corr,resp,s1,s2,fd_thres,varargin)
 % Calculate bias conditioned on previously easy/hard trials and
 % correct/incorrct trials. If there are multiple columns to each of the
 % input variables, they are treated as separate blocks of the same
@@ -11,8 +11,21 @@ function [dpr_bias,pc_bias,ntr_bias] = calc_bias_by_dfcltacc(corr,resp,s1,s2,fd_
 % - Index 4) easy & incorrect
 % Nate Zuk (2023)
 
+% Set of conditions. If any of these is NaN, this condition is ignored when
+% identifying trials (which can be used to look only at easy/hard or
+% correct/incorrect separately).
+conditions = [1 1; 0 1; 1 0; 0 0]; % indicates the conditions for easy/hard (1st coumn) and correct/incorrect (2nd column)
+
+% Parse varargin
+if ~isempty(varargin)
+    for n = 2:2:length(varargin)
+        eval([varargin{n-1} '=varargin{n};']);
+    end
+end
+
 ntr = size(corr,1);
 nblocks = size(corr,2);
+ncond = size(conditions,1);
 
 % Identify previously correct/incorrect responses
 % prevacc = NaN(ntr-1,nblocks);
@@ -47,20 +60,27 @@ currresp = reshape(resp(2:end,:),[(ntr-1)*nblocks 1]);
 freqdir = reshape(freqdir(2:end,:),[(ntr-1)*nblocks 1]);
 
 % Set up bias arrays
-dpr_bias = NaN(4,1); % d-prime bias
-pc_bias = NaN(4,1);
-ntr_bias = NaN(4,2); % number of trials for each bias+/bias- condition
+dpr_bias = NaN(ncond,1); % d-prime bias
+pc_bias = NaN(ncond,1);
+ntr_bias = NaN(ncond,2); % number of trials for each bias+/bias- condition
 
 % Iterate through conditions
-conditions = [1 1; 0 1; 1 0; 0 0]; % indicates the conditions for easy/hard (1st row) and correct/incorrect (2nd row)
 for c = 1:size(conditions,1)
     % make sure the trials are not misses
     notmiss = ~isnan(currresp);
     % get each bias type (bias+/bias-)
-    idx_p = prevdfclt==conditions(c,1) & prevacc==conditions(c,2) & stbias==1; % bias+
+    if isnan(conditions(c,1)), dfclt_chk = true(nblocks*(ntr-1),1);
+    else, dfclt_chk = prevdfclt==conditions(c,1);
+    end
+    if isnan(conditions(c,2)), acc_chk = true(nblocks*(ntr-1),1);
+    else, acc_chk = prevacc==conditions(c,2);
+    end
+    idx_p = dfclt_chk & acc_chk & stbias==1; % bias+
+%     idx_p = prevdfclt==conditions(c,1) & prevacc==conditions(c,2) & stbias==1; % bias+
     dpr_bp = calc_dpr(freqdir(idx_p&notmiss),currresp(idx_p&notmiss));
     pc_bp = sum(freqdir(idx_p)==currresp(idx_p))/sum(idx_p);
-    idx_m = prevdfclt==conditions(c,1) & prevacc==conditions(c,2) & stbias==0; % bias-
+    idx_m = dfclt_chk & acc_chk & stbias==0; % bias-
+%     idx_m = prevdfclt==conditions(c,1) & prevacc==conditions(c,2) & stbias==0; % bias-
     dpr_bm = calc_dpr(freqdir(idx_m&notmiss),currresp(idx_m&notmiss));
     pc_bm = sum(freqdir(idx_m)==currresp(idx_m))/sum(idx_m);
     % calculate bias

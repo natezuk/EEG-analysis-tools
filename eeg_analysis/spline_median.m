@@ -10,7 +10,7 @@ if nargin<4 || isempty(sbj_lbls)
     sbj_lbls = [];
 end
 
-nboot = 100; % number of permutations for calculating the median distribution
+nboot = 200; % number of permutations for calculating the median distribution
 
 if ~isempty(varargin)
     for n = 2:2:length(varargin)

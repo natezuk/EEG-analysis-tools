@@ -21,9 +21,12 @@ if nargin<9 || isempty(fl_suffix), fl_suffix=''; end
 % Plotting parameters
 fig_pos = [150 0 800 900];
 ylim = [-10 10];
+xlim = [-1000 1000];
 leg_loc = 'southeast';
 stderr_quantiles = [0.025 0.975];
 spline_ds = 6; % (20-9-2022) Allow user to specify the downsampling spline if desired
+cmap = [];
+mark_times = [];
 
 % Parse varargin
 if ~isempty(varargin)
@@ -87,7 +90,7 @@ end
 % Plot the ERP at each channel
 figure
 set(gcf,'Position',fig_pos);
-cmap = colormap('hsv')*0.8;
+if isempty(cmap), cmap = colormap('hsv')*0.8; end
 for jj = 1:length(chan_to_plot)
     % get the index for the channel
     chan = strcmp(chan_lbls,chan_to_plot{jj});
@@ -102,8 +105,12 @@ for jj = 1:length(chan_to_plot)
             ctrlmdERP(:,chan,c)'-ctrllqERP(:,chan,c)'],...
             'lineProps',{'Color',cmap(clr_idx,:),'LineWidth',2});
     end
+    % Mark times with dashed lines, if the times are provided
+    for m = 1:length(mark_times)
+        plot([mark_times(m) mark_times(m)],ylim,'k--');
+    end
     grid;
-    set(gca,'FontSize',12,'YLim',ylim);
+    set(gca,'FontSize',12,'YLim',ylim,'XLim',xlim);
     xlabel('Delay (ms)');
     ylabel('Median ERP (\muV)');
     title(sprintf('Controls (N=%d), %s',nctrl,chan_to_plot{jj}),'Interpreter','none');
@@ -118,8 +125,12 @@ for jj = 1:length(chan_to_plot)
             'lineProps',{'Color',cmap(clr_idx,:),'LineWidth',2});
         mdpl(c) = pl.mainLine;
     end
+    % Mark times with dashed lines, if the times are provided
+    for m = 1:length(mark_times)
+        plot([mark_times(m) mark_times(m)],ylim,'k--');
+    end
     grid;
-    set(gca,'FontSize',12,'YLim',ylim);
+    set(gca,'FontSize',12,'YLim',ylim,'XLim',xlim);
     xlabel('Delay (ms)');
     ylabel('Median ERP (\muV)');
     title(sprintf('ASD (N=%d), %s',nasd,chan_to_plot{jj}),'Interpreter','none');

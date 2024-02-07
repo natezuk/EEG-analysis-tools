@@ -1,4 +1,4 @@
-function [ctrl_v,asd_v] = plot_dlyerppk_bycond(ctrl_erps,asd_erps,dly,dir,dly_range,chan_to_avg,suffix,cond_lbls,ylbl,varargin)
+function [ctrl_v,asd_v,ctrl_t,asd_t] = plot_dlyerppk_bycond(ctrl_erps,asd_erps,dly,dir,dly_range,chan_to_avg,suffix,cond_lbls,ylbl,varargin)
 % Plot the ERP magnitudes for individual control and ASD subjects with
 % lines connecting the different conditions. The 'ctrl_erps' and
 % 'asd_erps', are cell arrays of cell arrays. Each cell in the main array
@@ -43,15 +43,20 @@ if ~isempty(varargin)
 end
 
 ctrl_v = NaN(nctrl,ncond);
+ctrl_t = NaN(nctrl,ncond);
 for s = 1:nctrl
     for c = 1:ncond
         erp = spline_median(ctrl_erps{s}{c},6,3);
         if length(chan_to_avg)>1
             % average over channels first
             erp = mean(erp(:,chan_to_avg,:),2);
-            ctrl_v(s,c) = calc_v_pk(erp,dly,dir,dly_range,[]);
+            [ctrl_v(s,c),ctrl_t(s,c)] = calc_v_pk(erp,dly,dir,dly_range,[]);
         else
-            ctrl_v(s,c) = calc_v_pk(erp,dly,dir,dly_range,chan_to_avg);
+            try
+                [ctrl_v(s,c),ctrl_t(s,c)] = calc_v_pk(erp,dly,dir,dly_range,chan_to_avg);
+            catch err
+                continue;
+            end
         end
         % calculate the average voltage within the delay range and set of
         % channels specified
@@ -60,15 +65,16 @@ for s = 1:nctrl
     end
 end
 asd_v = NaN(nasd,ncond);
+asd_t = NaN(nasd,ncond);
 for s = 1:nasd
     for c = 1:ncond
         erp = spline_median(asd_erps{s}{c},6,3);
         if length(chan_to_avg)>1
             % average over channels first
             erp = mean(erp(:,chan_to_avg,:),2);
-            asd_v(s,c) = calc_v_pk(erp,dly,dir,dly_range,[]);
+            [asd_v(s,c),asd_t(s,c)] = calc_v_pk(erp,dly,dir,dly_range,[]);
         else
-            asd_v(s,c) = calc_v_pk(erp,dly,dir,dly_range,chan_to_avg);
+            [asd_v(s,c),asd_t(s,c)] = calc_v_pk(erp,dly,dir,dly_range,chan_to_avg);
         end
         % calculate the average voltage within the delay range and set of
         % channels specified

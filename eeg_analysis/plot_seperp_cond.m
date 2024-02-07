@@ -7,11 +7,13 @@ if nargin<8, cond_lbl = {}; end
 if nargin<9, fl_suffix = ''; end
 
 % Plotting parameters
+xlim = [];
 yshift = 20; % number in uV to shift each neighboring subject
 mark_times = []; % times to mark in the ERP plots
 spline_ds = 6; % downsampling factor for the splines
 fig_pos = [100 100 450 900];
 leg_loc = 'northeast';
+cmap = [];
 
 % Parse varargin
 if ~isempty(varargin)
@@ -20,9 +22,16 @@ if ~isempty(varargin)
     end
 end
 
+if isempty(xlim), xlim = [min(dly) max(dly)]; end
+
 % Get the number of conditions
 unq_cond = unique(cond);
 ncond = length(unq_cond);
+
+if isempty(cmap)
+    % create the colormap
+    cmap = colormap('hsv')*0.8;
+end
 
 % Plot every correct/incorrect separated by subject
 for c = 1:length(chan_to_plot)
@@ -30,8 +39,6 @@ for c = 1:length(chan_to_plot)
     chanidx = strcmp(chan_lbls,chan_to_plot{c});
     figure
     set(gcf,'Position',fig_pos);
-    % get the colormap
-    cmap = colormap('hsv')*0.8;
     subplot(1,2,1);
     title(sprintf('Controls (N=%d)',length(ctrl_erps)));
     hold on
@@ -53,10 +60,10 @@ for c = 1:length(chan_to_plot)
             plot([mark_times(m) mark_times(m)],[-yshift*2 yoffset+yshift*2],'k--','LineWidth',1);
         end
     end
-    set(gca,'FontSize',12,'XLim',[0 500],'YTick',0:yshift:yoffset,...
+    set(gca,'FontSize',12,'XLim',xlim,'YTick',0:yshift:yoffset,...
         'YTickLabel',1:length(ctrl_erps),'YLim',[-2*yshift yoffset+2*yshift]);
     xlabel('Delay (ms)');
-    ylabel(['ERP aligned to RT ,' chan_lbls{c} ' (\muV)']);
+    ylabel(['ERP aligned to RT ,' chan_to_plot{c} ' (\muV)']);
 
     subplot(1,2,2);
     title(sprintf('ASD (N=%d)',length(asd_erps)));
@@ -80,7 +87,7 @@ for c = 1:length(chan_to_plot)
             plot([mark_times(m) mark_times(m)],[-yshift*2 yoffset+yshift*2],'k--','LineWidth',1);
         end
     end
-    set(gca,'FontSize',12,'XLim',[0 500],'YTick',0:yshift:yoffset,...
+    set(gca,'FontSize',12,'XLim',xlim,'YTick',0:yshift:yoffset,...
         'YTickLabel',1:length(asd_erps),'YLim',[-2*yshift yoffset+2*yshift]);
     xlabel('Delay (ms)');
     ylabel(['ERP aligned to RT ,' chan_to_plot{c} ' (\muV)']);
