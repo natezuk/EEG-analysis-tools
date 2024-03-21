@@ -1,0 +1,5 @@
+# Skip temporary files
+*~
+
+# Skip EEG data files
+*.bdf
